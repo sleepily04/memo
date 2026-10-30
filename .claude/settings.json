@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*credential*)",
+      "Read(**/*secret*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Bash(cat *.env*)",
+      "Bash(cat *credential*)",
+      "Bash(cat *secret*)",
+      "Bash(cat *.pem)",
+      "Bash(cat *.key)",
+      "Bash(type *.env*)",
+      "Bash(type *credential*)",
+      "Bash(type *secret*)",
+      "Bash(head *.env*)",
+      "Bash(tail *.env*)",
+      "Bash(less *.env*)",
+      "Bash(more *.env*)",
+      "Bash(grep * *.env*)",
+      "Bash(source *.env*)",
+      "PowerShell(Get-Content *.env*)",
+      "PowerShell(Get-Content *credential*)",
+      "PowerShell(Get-Content *secret*)",
+      "PowerShell(Get-Content *.pem)",
+      "PowerShell(Get-Content *.key)",
+      "PowerShell(gc *.env*)",
+      "PowerShell(cat *.env*)",
+      "PowerShell(type *.env*)"
+    ]
+  }
+}

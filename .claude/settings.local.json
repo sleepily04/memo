@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Start-Process msedge \"C:\\\\Users\\\\tgedu01\\\\Desktop\\\\memo\\\\mini\\\\memory-game.html\")",
+      "PowerShell(Start-Process msedge \"C:\\\\Users\\\\tgedu01\\\\Desktop\\\\memo\\\\mini\\\\landing.html\")"
+    ]
+  }
+}

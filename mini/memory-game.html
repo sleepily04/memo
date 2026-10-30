@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>동물 카드 짝 맞추기</title>
+<style>
+  :root {
+    --bg: #070a14;
+    --surface: rgba(16, 22, 40, 0.8);
+    --text: #eaf2ff;
+    --muted: #8d9ab8;
+    --line: rgba(120, 220, 255, 0.16);
+    --accent: #22e4ff;
+    --accent-glow: rgba(34, 228, 255, 0.45);
+    --haze: rgba(214, 62, 255, 0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    background:
+      radial-gradient(ellipse 60% 40% at 85% 0%, var(--haze) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 10% 30%, rgba(34, 228, 255, 0.10) 0%, transparent 70%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { width: 100%; max-width: 520px; }
+
+  header { text-align: center; margin-bottom: 28px; }
+  h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 20px; }
+  h1 em { font-style: normal; color: var(--accent); text-shadow: 0 0 24px var(--accent-glow); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .stat { color: var(--muted); font-size: 15px; }
+  .stat b { color: var(--text); font-size: 18px; margin-left: 4px; }
+
+  .btn {
+    border: 0;
+    cursor: pointer;
+    background: var(--accent);
+    color: #04121a;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.25) inset, 0 0 20px var(--accent-glow);
+    transition: transform .15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: scale(0.97); }
+
+  .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .card {
+    aspect-ratio: 1;
+    perspective: 600px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+  }
+  .inner {
+    position: relative;
+    display: block;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .4s ease;
+  }
+  .card.flipped .inner, .card.matched .inner { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .back {
+    background: linear-gradient(135deg, rgba(34, 228, 255, 0.16), rgba(214, 62, 255, 0.16)), var(--surface);
+    color: var(--accent);
+    font-size: 28px;
+    font-weight: 800;
+    text-shadow: 0 0 16px var(--accent-glow);
+  }
+  .card:hover:not(.flipped):not(.matched) .back { border-color: rgba(34, 228, 255, 0.55); }
+  .front {
+    background: var(--surface);
+    font-size: clamp(32px, 10vw, 52px);
+    transform: rotateY(180deg);
+  }
+  .card.matched .front { border-color: var(--accent); box-shadow: 0 0 24px var(--accent-glow); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 18px; }
+
+  .overlay {
+    position: fixed; inset: 0;
+    display: none;
+    align-items: center; justify-content: center;
+    background: rgba(7, 10, 20, 0.75);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    padding: 16px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 44px 40px;
+    box-shadow: 0 0 60px rgba(34, 228, 255, 0.18);
+  }
+  .modal .emoji { font-size: 56px; margin-bottom: 12px; }
+  .modal h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .modal p { color: var(--muted); margin-bottom: 28px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>동물 카드 <em>짝 맞추기</em></h1>
+    <div class="bar">
+      <div class="stat">시도<b id="tries">0</b></div>
+      <div class="stat">맞춘 쌍<b id="pairs">0/8</b></div>
+      <button class="btn" id="reset" type="button">다시 하기</button>
+    </div>
+  </header>
+  <div class="board" id="board"></div>
+</main>
+
+<div class="overlay" id="win">
+  <div class="modal">
+    <div class="emoji">🎉</div>
+    <h2>성공!</h2>
+    <p id="winText"></p>
+    <button class="btn" id="again" type="button">다시 하기</button>
+  </div>
+</div>
+
+<script>
+  const ANIMALS = ['🐶', '🐱', '🦊', '🐼', '🐸', '🦁', '🐵', '🐰'];
+  const board = document.getElementById('board');
+  const triesEl = document.getElementById('tries');
+  const pairsEl = document.getElementById('pairs');
+  const win = document.getElementById('win');
+
+  let first = null, lock = false, tries = 0, pairs = 0;
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function newGame() {
+    first = null; lock = false; tries = 0; pairs = 0;
+    triesEl.textContent = '0';
+    pairsEl.textContent = '0/' + ANIMALS.length;
+    win.classList.remove('show');
+    board.innerHTML = '';
+    shuffle([...ANIMALS, ...ANIMALS]).forEach(animal => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card';
+      card.dataset.animal = animal;
+      card.setAttribute('aria-label', '카드');
+      card.innerHTML =
+        '<span class="inner"><span class="face back">?</span><span class="face front">' + animal + '</span></span>';
+      card.addEventListener('click', () => flip(card));
+      board.appendChild(card);
+    });
+  }
+
+  function flip(card) {
+    if (lock || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    if (!first) { first = card; return; }
+
+    tries++;
+    triesEl.textContent = tries;
+    const a = first, b = card;
+    first = null;
+
+    if (a.dataset.animal === b.dataset.animal) {
+      a.classList.replace('flipped', 'matched');
+      b.classList.replace('flipped', 'matched');
+      pairs++;
+      pairsEl.textContent = pairs + '/' + ANIMALS.length;
+      if (pairs === ANIMALS.length) {
+        document.getElementById('winText').textContent = tries + '번 만에 모든 짝을 맞췄어요!';
+        setTimeout(() => win.classList.add('show'), 500);
+      }
+    } else {
+      lock = true;
+      setTimeout(() => {
+        a.classList.remove('flipped');
+        b.classList.remove('flipped');
+        lock = false;
+      }, 800);
+    }
+  }
+
+  document.getElementById('reset').addEventListener('click', newGame);
+  document.getElementById('again').addEventListener('click', newGame);
+  newGame();
+</script>
+</body>
+</html>
