@@ -4,7 +4,7 @@ import { animate, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
 /* 화면에 들어올 때 0에서 value까지 올라가는 숫자. 모션 줄이기 설정이면 바로 value를 보여 준다. */
-export function CountUp({ value, duration = 0.8 }: { value: number; duration?: number }) {
+export function CountUp({ value, duration = 0.16 }: { value: number; duration?: number }) {
   const reduceMotion = useReducedMotion();
   const [shown, setShown] = useState(0);
 
