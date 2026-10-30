@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CATEGORIES, type Memo, type MemoCategory } from "@/data/memos";
 import { Card, CardHeader } from "./card";
 import { Chip } from "./chip";
+import { CountUp } from "./count-up";
 import { IconPlus } from "./icons";
 import { MemoItem } from "./memo-item";
 import { PrimaryButton } from "./primary-button";
@@ -24,7 +25,9 @@ export function HomeScreen({ memos: allMemos }: { memos: Memo[] }) {
           <h1 className="text-heading-xl text-text-primary">
             오늘까지 메모를
             <br />
-            <span className="text-primary">{allMemos.length}개</span> 남겼어요
+            <span className="text-primary">
+              <CountUp value={allMemos.length} />개
+            </span> 남겼어요
           </h1>
         </header>
 

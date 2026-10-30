@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect,useRef, useState, useSyncExternalStore } from "react";
 import { CATEGORIES, type MemoLabel } from "@/data/memos";
 import { fillEditor, parseEditor } from "@/lib/editor-content";
 import { clearDraft, readDraft, saveDraft, saveMemo } from "@/lib/memo-store";
@@ -86,6 +87,7 @@ function WriteNav({ autoSaved }: { autoSaved: boolean }) {
 
 function WriteForm() {
   const goHome = useGoHome();
+  const router = useRouter();
   const editorRef = useRef<HTMLDivElement>(null);
   const [draft] = useState(readDraft);
   const [title, setTitle] = useState(draft?.title ?? "");
@@ -146,6 +148,8 @@ function WriteForm() {
       return;
     }
     clearDraft();
+    /* 홈이 예전 목록을 재사용하지 않게, 저장한 직후 화면 캐시를 비운다. */
+    router.refresh();
     goHome();
   };
 
